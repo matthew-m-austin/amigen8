@@ -234,7 +234,7 @@ function CarveLVM_Efi {
     mkpart primary xfs $(( 2 + UEFIDEVSZ ))m 100% \
     set 1 bios_grub on \
     set 2 esp on \
-    set 4 lvm on || \
+    set 3 lvm on || \
       err_exit "Failed laying down new partition-table"
 
   ## Create LVM objects
