@@ -155,17 +155,14 @@ function DoLvmMounts {
 
 }
 
-# mount /boot and /boot/efi partitions
+# mount /boot/efi partition and create /boot dir if needed
 function MountBootFSes {
 
-  # Create /boot mountpoint as needed
+  # Create /boot directory as needed
   if [[ ! -d "${CHROOTMNT}/boot" ]]
   then
     mkdir "${CHROOTMNT}/boot"
   fi
-
-  # Mount BIOS-boot partition
-  mount -t "${FSTYPE}" "${CHROOTDEV}${PARTPRE}3" "${CHROOTMNT}/boot"
 
   # Create /boot/efi mountpoint as needed
   if [[ ! -d "${CHROOTMNT}/boot/efi" ]]
