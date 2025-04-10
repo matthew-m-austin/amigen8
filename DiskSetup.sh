@@ -7,7 +7,7 @@ set -eu -o pipefail
 PROGNAME=$(basename "$0")
 BOOTDEVSZMIN="1024"
 BOOTDEVSZ="${BOOTDEVSZ:-${BOOTDEVSZMIN}}"
-UEFIDEVSZ="${UEFIDEVSZ:-100}"
+UEFIDEVSZ="${UEFIDEVSZ:-200}"
 CHROOTDEV="${CHROOTDEV:-UNDEF}"
 DEBUG="${DEBUG:-UNDEF}"
 FSTYPE="${FSTYPE:-xfs}"
@@ -231,10 +231,7 @@ function CarveLVM_Efi {
   parted -s "${CHROOTDEV}" -- mktable gpt \
     mkpart primary "${FSTYPE}" 1049k 2m \
     mkpart primary fat16 4096s $(( 2 + UEFIDEVSZ ))m \
-    mkpart primary xfs $((
-      2 + UEFIDEVSZ ))m $(( ( 2 + UEFIDEVSZ ) + BOOTDEVSZ
-    ))m \
-    mkpart primary xfs $(( ( 2 + UEFIDEVSZ ) + BOOTDEVSZ ))m 100% \
+    mkpart primary xfs $(( 2 + UEFIDEVSZ ))m 100% \
     set 1 bios_grub on \
     set 2 esp on \
     set 4 lvm on || \
@@ -244,7 +241,7 @@ function CarveLVM_Efi {
 
   # Create root VolumeGroup
   err_exit "Creating LVM2 volume-group ${VGNAME}..." NONE
-  vgcreate -y "${VGNAME}" "${CHROOTDEV}${PARTPRE:-}4" || \
+  vgcreate -y "${VGNAME}" "${CHROOTDEV}${PARTPRE:-}3" || \
     err_exit "VG creation failed. Aborting!"
 
   # Create LVM2 volume-objects by iterating ${PARTITIONARRAY}
@@ -347,11 +344,6 @@ function SetupBootParts_Efi {
   mkfs -t vfat -n "${LABEL_UEFI}" "${CHROOTDEV}${PARTPRE:-}2" || \
     err_exit "Failed creating filesystem"
 
-  # Make filesystem for /boot
-  err_exit "Creating filesystem on ${CHROOTDEV}${PARTPRE:-}3..." NONE
-  mkfs -t "${FSTYPE}" "${MKFSFORCEOPT}" -L "${LABEL_BOOT}" \
-    "${CHROOTDEV}${PARTPRE:-}3" || \
-    err_exit "Failed creating filesystem"
 }
 
 ######################
