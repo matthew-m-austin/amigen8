@@ -372,7 +372,7 @@ ValidateTgtMnt
 if [[ -d /sys/firmware/efi ]]
 then
   # Locate LVM2 volume-group name (EFI)
-  read -r VGNAME <<< "$( pvs --noheading -o vg_name "${CHROOTDEV}${PARTPRE}4" )"
+  read -r VGNAME <<< "$( pvs --noheading -o vg_name "${CHROOTDEV}${PARTPRE}3" )"
 else
   # Locate LVM2 volume-group name (no EFI)
   read -r VGNAME <<< "$( pvs --noheading -o vg_name "${CHROOTDEV}${PARTPRE}2" )"
