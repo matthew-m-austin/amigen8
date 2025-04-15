@@ -486,30 +486,6 @@ function GrubSetup {
    fi
 }
 
-# Set up GRUB to support both BIOS- and EFI-boot
-function GrubSetup_DualMode {
-  err_exit "Installing helper-script..." NONE
-  install -bDm 0755  "$( dirname "${0}" )/DualMode-GRUBsetup.sh" \
-    "${CHROOTMNT}/root" || err_exit "Failed installing helper-script"
-  err_exit "SUCCESS" NONE
-
-  err_exit "Running helper-script..." NONE
-  chroot "${CHROOTMNT}" /root/DualMode-GRUBsetup.sh || \
-    err_exit "Failed running helper-script..."
-  err_exit "SUCCESS" NONE
-
-  err_exit "Cleaning up helper-script..." NONE
-  rm "${CHROOTMNT}/root/DualMode-GRUBsetup.sh" || \
-    err_exit "Failed removing helper-script..."
-  err_exit "SUCCESS" NONE
-
-  # Make intramfs in chroot-dev
-  if [[ ${FIPSDISABLE} != "true" ]]
-  then
-    FipsSetup
-  fi
-}
-
 function FipsSetup {
   err_exit "Attempting to enable FIPS mode in ${CHROOTMNT}..." NONE
   chroot "${CHROOTMNT}" /bin/bash -c "fips-mode-setup --enable" || \
@@ -741,12 +717,6 @@ ConfigureCloudInit
 ## Do GRUB2 setup tasks ##
 # Basic Setup
 GrubSetup
-
-# Legacy (BIOS) boot-mode setup
-if [[ -d /sys/firmware/efi ]]
-then
-  GrubSetup_DualMode
-fi
 
 # Clean up fstab
 sed -i '/^\/dev\/.*\s\s*\/boot/d' "${CHROOTMNT}/etc/fstab"
