@@ -142,37 +142,6 @@ function CreateFstab {
    # Add EFI-supporting partitions as necessary
    if [[ -d /sys/firmware/efi ]]
    then
-     # Add /boot partition to fstab
-     BOOT_PART="$(
-       grep "${CHROOTMNT}/boot " /proc/mounts | \
-       sed 's/ /:/g'
-     )"
-     if [[ ${BOOT_PART} =~ ":xfs:" ]]
-     then
-       err_exit "Adding XFS-formatted /boot filesystem to fstab" NONE
-       BOOT_LABEL="$(
-         xfs_admin -l "${BOOT_PART//:*/}" | \
-         sed -e 's/"$//' -e 's/^.*"//'
-       )"
-       printf 'LABEL=%s\t/boot\txfs\tdefaults,rw\t0 0\n' "${BOOT_LABEL}" >> \
-         "${CHROOTMNT}/etc/fstab" || \
-         err_exit "Failed adding '/boot' to /etc/fstab"
-     elif [[ ${BOOT_PART} =~ ":ext"[2-4]":" ]]
-     then
-       err_exit "Adding EXTn-formatted /boot filesystem to fstab" NONE
-       BOOT_LABEL="$(
-         e2label "${BOOT_PART//:*/}"
-       )"
-       # shellcheck disable=SC2001
-       BOOT_FSTYP="$(
-         sed 's/\s\s*/:/g' <<< "${BOOT_PART}" | \
-         cut -d ':' -f 3
-       )"
-       printf 'LABEL=%s\t/boot\t%s\tdefaults,rw\t0 0\n' \
-         "${BOOT_LABEL}" "${BOOT_FSTYP}" >> "${CHROOTMNT}/etc/fstab" || \
-         err_exit "Failed adding '/boot' to /etc/fstab"
-     fi
-
      # Add /boot/efi partition to fstab
      err_exit "Adding /boot/efi filesystem to fstab" NONE
      UEFI_PART="$(
